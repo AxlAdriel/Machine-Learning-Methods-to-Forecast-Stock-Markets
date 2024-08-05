@@ -1,0 +1,1203 @@
+---
+title: "Final Project"
+Course: "Advance Financial Modelling"
+author: "Group 13"
+member: "Kike Egues, Axel Peluso, Liping Song, and Brian Zurita"
+date: "2022-04-24"
+output: pdf_document
+---
+
+# Project version 1: (Regression) 
+
+*Packages that have to be installed for run new codes:*
+
+-   *install.packages("dplyr")*
+-   *install.packages("Hmisc")*
+-   *install.packages("tidyr")*
+-   *install.packages("caret")*
+-   *install.packeges("latexpdf")*
+-   *install.packages("latex2exp")*
+-   *install.packages("latexdiffr")*
+-   *install.packages ("car")*
+-   *install.packages ("carData")*
+-   *install.packages ("stargazer")*
+-   *install.packages ("sjPlot")*
+-   *install.packages ("sjmisc")*
+-   *install.packages ("sjlabelled")*
+-   *install.packages ("sjPlot")*
+-   *install.packages ("gtsummary")*
+-   *install.packages ("textreg")*
+-   *install.packages("Hmisc")*
+
+```{r, include=FALSE, results = "hide"}
+##Libraries run for run the code:
+library (dplyr)
+library (tidyr)
+library (Hmisc)
+library (corrplot)
+library (ggplot2)
+library (caret)
+library (ranger)
+library (xgboost)
+library (leaps)
+library (caret)
+library (ranger)
+library (latexpdf)
+library (latex2exp)
+library (latexdiffr)
+library (car)
+library (carData)
+library (stargazer)
+library (sjPlot)
+library (sjmisc)
+library (sjlabelled)
+library (sjPlot)
+library (gtsummary)
+library (textreg)
+library (Hmisc)
+```
+
+# 1. Which feature variables are most correlated with the response variable ('y_Today')?
+
+## Lags & Ps
+
+```{r, include = FALSE, hide = FALSE}
+df = read.csv("finaldata.csv")
+df1 = df[,-4]
+df2 = df1[,-c(19:97)]
+dftrain = df2[1:1400,]
+dftest = df2[1401:1659,]
+c = cor(df2)
+c
+```
+
+```{r}
+corrplot(c,tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: Lags & Ps", mar=c(0,0,1,0))
+```
+
+```{r include=FALSE, results = "hide"}
+print(c)
+pdf (file = 'c_preg1 Lags & Ps.pdf')
+corrplot(c,tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: Lags & Ps", mar=c(0,0,1,0))
+```
+
+```{r}
+corrplot (c, method = "number", tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: Lags & Ps", mar=c(0,0,1,0),number.cex = .5, addshade = 'all',shade.col = "black",number.digits = 3)
+```
+
+```{r include=FALSE, results = "hide"}
+pdf (file = 'c_preg1# Lags & Ps.pdf')
+corrplot (c, method = "number", tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: Lags & Ps", mar=c(0,0,1,0),number.cex = .75, addshade = 'all',shade.col = "black",number.digits = 3)
+```
+
+## FXIs
+
+```{r, include = FALSE, hide = FALSE}
+df2 = subset(df1, select=c("y_High","y_Low","y_Today", "FXI.Lag1","FXI.Lag2","FXI.Lag3","FXI.Lag4","FXI.Lag5","FXI.P1","FXI.P2","FXI.P3","FXI.P4","FXI.P5","FXI.P6", "FXI.P7","FXI.P8","FXI.P9","FXI.P10"))
+c2 = cor(df2)
+c2
+```
+
+```{r}
+corrplot (c2,tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: FXIs", mar=c(0,0,1,0))
+```
+
+```{r include=FALSE,  results = "hide"}
+print(c2)
+pdf (file = 'c2_preg1 FXIs.pdf')
+corrplot(c2,tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: FXIs", mar=c(0,0,1,0))
+```
+
+```{r}
+corrplot (c2, method = "number", tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: FXIs", mar=c(0,0,1,0),number.cex = .5, addshade = 'all',shade.col = "black",number.digits = 3)
+```
+
+```{r include=FALSE, results = "hide"}
+pdf (file = 'c2_preg1# FXIs.pdf')
+corrplot (c2, method = "number", tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: FXIs", mar=c(0,0,1,0),number.cex = .75, addshade = 'all',shade.col = "black",number.digits = 3)
+```
+
+## EWUs 
+
+```{r, include = FALSE, hide = FALSE}
+df2 = subset(df1, select=c("y_High","y_Low","y_Today","EWU.Lag1", "EWU.Lag2", "EWU.Lag3", "EWU.Lag4", "EWU.Lag5",  "EWU.P1", "EWU.P2", "EWU.P3", "EWU.P4", "EWU.P5", "EWU.P6", "EWU.P7", "EWU.P8", "EWU.P9", "EWU.P10"))
+c3 = cor(df2)
+c3
+```
+
+```{r}
+corrplot(c3,tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: EWUs", mar=c(0,0,1,0))
+```
+
+```{r include=FALSE,  results = "hide"}
+print(c3)
+pdf (file = 'c3_preg1 EWUs.pdf')
+corrplot(c3,tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: EWUs", mar=c(0,0,1,0))
+```
+
+```{r}
+corrplot (c3, method = "number", tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: EWUs", mar=c(0,0,1,0),number.cex = .5, addshade = 'all',shade.col = "black",number.digits = 3)
+```
+
+```{r include=FALSE, results = "hide"}
+pdf (file = 'c3_preg1# EWUs.pdf')
+corrplot (c3, method = "number", tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: EWUs", mar=c(0,0,1,0),number.cex = .75, addshade = 'all',shade.col = "black",number.digits = 3)
+```
+
+## EWJs
+
+```{r, include = FALSE, hide = FALSE}
+df2 = subset(df1, select=c("y_High","y_Low","y_Today","EWJ.Lag1", "EWJ.Lag2", "EWJ.Lag3", "EWJ.Lag4", "EWJ.Lag5", "EWJ.P1", "EWJ.P2", "EWJ.P3", "EWJ.P4", "EWJ.P5", "EWJ.P6", "EWJ.P7", "EWJ.P8", "EWJ.P9" ,"EWJ.P10"))
+c4 = cor(df2)
+c4
+```
+
+```{r}
+corrplot(c4,tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: EWJs", mar=c(0,0,1,0))
+```
+
+```{r include=FALSE,  results = "hide"}
+print(c4)
+pdf (file = 'c4_preg1 EWJs.pdf')
+corrplot(c4,tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: EWJs", mar=c(0,0,1,0))
+```
+
+```{r}
+corrplot (c4, method = "number", tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: EWJs", mar=c(0,0,1,0),number.cex = .5, addshade = 'all',shade.col = "black",number.digits = 3)
+```
+
+```{r include=FALSE, results = "hide"}
+pdf (file = 'c4_preg1# EWJs.pdf')
+corrplot (c4, method = "number", tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: EWJs", mar=c(0,0,1,0),number.cex = .75, addshade = 'all',shade.col = "black",number.digits = 3)
+```
+
+## EWGs
+
+```{r, include = FALSE, hide = FALSE}
+df2 = subset(df1, select=c("y_High","y_Low","y_Today","EWG.Lag1", "EWG.Lag2", "EWG.Lag3", "EWG.Lag4", "EWG.Lag5","EWG.P1", "EWG.P2", "EWG.P3", "EWG.P4", "EWG.P5", "EWG.P6", "EWG.P7", "EWG.P8", "EWG.P9", "EWG.P10"))
+c5 = cor(df2)
+c5
+```
+
+```{r}
+corrplot(c5,tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: EWGs", mar=c(0,0,1,0))
+```
+
+```{r include=FALSE, results = "hide"}
+print(c5)
+pdf (file = 'c5_preg1 EWGs.pdf')
+corrplot(c5,tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: EWGs", mar=c(0,0,1,0))
+```
+
+```{r}
+corrplot (c5, method = "number", tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: EWGs", mar=c(0,0,1,0),number.cex = .5, addshade = 'all',shade.col = "black",number.digits = 3)
+```
+
+```{r include=FALSE, results = "hide"}
+pdf (file = 'c5_preg1# EWGs.pdf')
+corrplot (c5, method = "number", tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: EWGs", mar=c(0,0,1,0),number.cex = .75, addshade = 'all',shade.col = "black",number.digits = 3)
+```
+
+## VIXs
+
+```{r, include = FALSE, hide = FALSE}
+df2 = subset(df1, select=c("y_High","y_Low","y_Today","VIX.Lag1", "VIX.Lag2", "VIX.Lag3", "VIX.Lag4", "VIX.Lag5", "VIX.P1", "VIX.P2", "VIX.P3", "VIX.P4", "VIX.P5", "VIX.P6", "VIX.P7", "VIX.P8", "VIX.P9", "VIX.P10"))
+c6 = cor(df2)
+c6
+```
+
+```{r}
+corrplot(c6,tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: VIXs", mar=c(0,0,1,0))
+```
+
+```{r include=FALSE, results = "hide"}
+print(c6)
+pdf (file = 'c6_preg1 VIXs.pdf')
+corrplot(c6,tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: VIXs", mar=c(0,0,1,0))
+```
+
+```{r}
+corrplot (c6, method = "number", tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: VIXs", mar=c(0,0,1,0),number.cex = .5, addshade = 'all',shade.col = "black",number.digits = 3)
+```
+
+```{r include=FALSE, results = "hide"}
+pdf (file = 'c6_preg1# VIXs.pdf')
+corrplot (c6, method = "number", tl.cex=0.75, tl.srt=70, main ="Correlation Matrix: VIXs", mar=c(0,0,1,0),number.cex = .75, addshade = 'all',shade.col = "black",number.digits = 3)
+```
+
+### Comment on the correlations.
+
+*For statistical, we included the code for absolute value in order to find which variables were most correlated to y_Today and for ease of analysis.*\
+*For Lags & Ps, the most highly correlated are P2 & P8.*\
+*For FXIs, the most highly correlated are Lag1 & Lag3.*\
+*For EWU, the most highly correlated are P1 & P4.*\
+*For EWJ, the most highly correlated are Lag5 & P8.*\ 
+*For EWG, the most highly correlated are P1 and P2.*\
+*For VIX, the most correlated are Lag5 and P8 are highly correlated variables to Y_Today.*
+
+*Code for identify the highest correlation value with y_Today* [*https://stackoverflow.com/questions/46308308/find-the-pair-of-most-correlated-variables*](https://stackoverflow.com/questions/46308308/find-the-pair-of-most-correlated-variables){.uri}
+
+## 2. Fit 4 (maybe 8?) different regression models on the 'y_Today' response variable and compare the resulting RMSE and MAE values on the test data set. You will be expected to show your results in a visually appealing graph.
+
+*Split the data into training and testing data sets*
+
+*"You should use a train/test split of the first 1400 observations as the training data and the remaining 259 observations as test data"*
+
+```{r, results='hide', include=FALSE}
+train = df[1:1400,]
+test = df[1401:1659,]
+```
+
+# y_Today
+
+## Regression Model 1: Min square root
+
+```{r}
+reg = lm(y_Today ~ . -y_High -y_Low -y_Direction, data = train)
+summary(reg)
+```
+
+```{r}
+avPlots (reg)
+```
+```{r}
+plot (reg)
+```
+
+```{r}
+pdf ("MSRplot y_Today.pdf")
+plot (reg)
+```
+
+
+
+```{r}
+coef(lm(y_Today ~ . -y_High -y_Low -y_Direction, data = train))
+```
+
+```{r include=FALSE, results = "hide"}
+tab_model (reg, file = "reg_ytoday.doc")
+```
+
+
+
+```{r}
+pred = predict(reg, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_Today - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_Today-pred))
+```
+
+## Regression Model 2: Backward Elimination
+
+```{r include=FALSE, results="hide"}
+full = lm(y_Today ~. -y_High -y_Low -y_Direction, data = train)  
+#including interactions --> too long
+BE = step(full, direction = "backward") 
+#backward setting. You need to start with the full model and start deleting variables from there. 
+```
+
+```{r}
+summary(BE)
+```
+
+```{r}
+plot (full)
+```
+
+```{r}
+plot (BE)
+```
+```{r}
+pdf ("BEplot y_Today.pdf")
+plot (BE)
+
+pdf ("fullplot y_Today.pdf")
+plot (full)
+```
+
+```{r}
+coef(lm(y_Today ~ . -y_High -y_Low -y_Direction, data = train))
+```
+
+```{r include=FALSE, results = "hide"}
+tab_model (BE, file = "BE_ytoday.doc")
+```
+
+```{r}
+pred = predict(BE, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_Today - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_Today-pred))
+```
+
+## Regression Model 3: Forward Selection
+
+```{r include=FALSE, results = "hide"}
+null = lm(y_Today ~ 1, data = train)
+FS = step(null, scope = list(upper = full), direction = "forward")  
+#you need to start with null model and start adding variables to it. 
+```
+
+```{r}
+summary(FS)
+```
+
+```{r include=FALSE, results = "hide"}
+tab_model (FS, file = "FS_y_today.doc")
+```
+
+```{r}
+plot (null)
+```
+
+```{r}
+plot (BE)
+```
+
+```{r}
+pdf ("nullplot y_Today.pdf")
+plot (null)
+
+pdf ("FSplot y_Today.pdf")
+plot (FS)
+```
+
+```{r}
+pred = predict(FS, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_Today - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_Today-pred))
+```
+
+## Regression Model 4: Stepwise
+
+```{r include=FALSE, results="hide"}
+stepwise = step(null, scope = list(upper=full), direction = "both") 
+#starts from nothing and it add as variables but can also eliminate variables.
+```
+
+```{r}
+summary(stepwise)
+```
+
+```{r include=FALSE, results = "hide"}
+tab_model (stepwise, file = "stepwise_y_today.doc")
+```
+
+```{r}
+plot (stepwise)
+```
+
+```{r}
+pdf ("stepwiseplot y_Today.pdf")
+plot (stepwise)
+```
+
+```{r}
+pred = predict(stepwise, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_Today - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_Today-pred))
+```
+
+## Regression Model 5: Random Forest
+
+```{r}
+
+# Fit random forest
+model = train(y_Today ~ . - y_High - y_Low -y_Direction, data = train, method = "ranger", tuneLength = 5)
+
+model
+```
+
+```{r}
+plot(model, main = "Graphic of Regression Model 5: Random Forest")
+```
+
+```{r, results='hide'}
+pdf (file = 'GBM_rf_MOD5 y_Today.pdf')
+plot(model, main = "Graphic of Regression Model 5: Random Forest")
+```
+
+```{r, results='hide'}
+pred = predict(model, test)
+```
+
+## Regression Model 6: Gradient Boosting Method
+
+```{r include=FALSE, results="hide"}
+GBM = train(y_Today ~ . -y_High -y_Low -y_Direction, data = train, method = "gbm", tuneLength = 5)
+```
+
+```{r}
+plot(GBM, main = "Graphic of Regression Model 6: Gradient Boosting")
+```
+```{r, results='hide'}
+pdf (file = 'GBM_Mod6 y_Today.pdf')
+plot(GBM, main = "Graphic of Regression Model 6: Gradient Boosting")
+```
+
+
+```{r}
+pred = predict(GBM, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_Today - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_Today-pred))
+```
+
+
+## Regression Model 7: Elastic Net
+
+```{r, results="hide", include=FALSE}
+EN = train(y_Today ~ . -y_High -y_Low -y_Direction, data = train, method = "glmnet")
+```
+
+```{r}
+plot(EN, main = "Graphic of Regression Model 7: Elastic Net")
+```
+
+```{r}
+pdf (file = 'EN_Mod7 y_Today.pdf')
+plot(EN, main = "Graphic of Regression Model 7: Elastic Net")
+```
+
+
+```{r}
+pred = predict(EN, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_Today - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_Today-pred))
+```
+
+## Regression Model 8: Best Subsets
+
+```{r include=FALSE}
+head(dftrain)
+```
+
+```{r, results="hide"}
+BSR = regsubsets(y_Today ~. -y_High -y_Low, data = dftrain)
+```
+
+```{r}
+summary(BSR)
+```
+
+```{r}
+plot(BSR, main = "Best Subsets")
+```
+
+```{r, results='hide'}
+pdf (file = 'BS_mod8 y_Today.pdf')
+plot(BSR, main = "Best Subsets")
+```
+
+```{r}
+plot(BSR, scale = "adjr2", main="Best Subsets with adjr2")
+```
+```{r, results='hide'}
+pdf (file = 'BS_adjr2_mod8 y_Today.pdf')
+plot(BSR, scale = "adjr2", main="Best Subsets with Adjusted R-Squared")
+```
+
+
+```{r}
+reg = lm(y_Today ~ P10, data = dftest) #remember y_high and y_low no included 
+summary(reg)
+```
+
+```{r include=FALSE, results = "hide"}
+tab_model (reg, file = "reg_y_today.doc")
+```
+
+```{r}
+plot (reg)
+```
+
+```{r}
+pdf ("regy_todayplot.pdf")
+plot (reg)
+```
+
+```{r}
+pred = predict(reg, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_Today - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_Today-pred))
+```
+
+
+### Fit 4 regression models on both the 'y_High' and 'y_Low' response variables and compare the resulting RMSE and MAE values on the test data set. You will be expected to show your results in a visually appealing graph (or graphs).
+
+# y_High
+
+## Regression Model 1: Min square root
+
+```{r}
+reg = lm(y_High ~ .-y_Today -y_Low -y_Direction , data = train)
+summary(reg)
+```
+```{r include=FALSE, results = "hide"}
+tab_model (reg, file = "reg_y_high.doc")
+```
+
+```{r}
+plot (reg)
+```
+
+```{r}
+pdf ("regy_yhighplot.pdf")
+plot (reg)
+```
+
+
+
+```{r}
+pred = predict(reg, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_High - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_High-pred))
+```
+
+## Regression Model 2: Backward Elimination
+
+```{r include=FALSE, results="hide"}
+full = lm(y_High ~. -y_Today -y_Low -y_Direction, data = train)  
+#including interactions --> too long
+BE = step(full, direction = "backward") 
+#backward setting. You need to start with the full model and start deleting variables from there. 
+```
+
+```{r}
+summary(BE)
+```
+
+```{r include=FALSE, results = "hide"}
+tab_model (BE, file = "BE_y_high.doc")
+```
+
+```{r}
+plot (full)
+```
+
+```{r}
+pdf ("fully_yhighplot.pdf")
+plot (full)
+```
+
+```{r}
+plot (BE)
+```
+
+```{r}
+pdf ("BEy_yhighplot.pdf")
+plot (BE)
+```
+
+```{r}
+pred = predict(BE, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_High - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_High-pred))
+```
+
+## Regression Model 3: Forward Selection
+
+```{r include=FALSE, results="hide"}
+null = lm(y_High ~ 1, data = train)
+FS = step(null, scope = list(upper = full), direction = "forward")  
+#you need to start with null model and start adding variables to it. 
+```
+
+```{r}
+summary(FS)
+```
+```{r include=FALSE, results = "hide"}
+tab_model (FS, file = "FS_y_high.doc")
+```
+
+```{r}
+plot (null)
+```
+
+```{r}
+pdf ("nully_yhighplot.pdf")
+plot (null)
+```
+
+```{r}
+plot (FS)
+```
+
+```{r}
+pdf ("FSy_yhighplot.pdf")
+plot (FS)
+```
+
+```{r}
+pred = predict(FS, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_High - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_High-pred))
+```
+
+## Regression Model 4: Stepwise
+
+```{r include=FALSE, results="hide"}
+stepwise = step (null, scope = list(upper=full), direction = "both") 
+#starts from nothing and it addas variables but can also eliminate variables.
+```
+
+```{r}
+summary(stepwise)
+```
+
+```{r include=FALSE, results = "hide"}
+tab_model (stepwise, file = "stepwise_y_high.doc")
+```
+
+```{r}
+plot (stepwise)
+```
+
+```{r}
+pdf ("stepwisey_yhighplot.pdf")
+plot (stepwise)
+```
+
+```{r}
+pred = predict(stepwise, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_High - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_High-pred))
+```
+
+## Regression Model 5: Random Forest
+
+```{r}
+
+# Fit random forest
+model = train(y_High ~ . - y_Today - y_Low -y_Direction, train, method = "ranger", tuneLength = 1)
+
+model
+```
+
+## Regression Model 6: Gradient Boosting Method
+
+```{r include=FALSE, results="hide"}
+GBM = train(y_High ~ . -y_Today -y_Low -y_Direction, data = train, method = "gbm", tuneLength = 5)
+```
+
+```{r}
+plot(GBM, main = "Graphic of Regression Model 6: Gradient Boosting Method")
+```
+```{r, results='hide'}
+pdf (file = 'GBM_Model6_y_High.pdf')
+plot(GBM, main = "Graphic of Regression Model 6: Gradient Boosting Method")
+```
+
+
+```{r}
+pred = predict(GBM, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_Low - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_Low-pred))
+```
+
+## Regression Model 7: Elastic Net
+
+```{r, results="hide"}
+EN = train(y_High ~ . -y_Today -y_Low -y_Direction, data = train, method = "glmnet")
+```
+
+```{r}
+plot(EN, main = "Graphic of Regression Model 7: Elastic Net")
+```
+
+```{r, results='hide'}
+pdf (file = 'EN_Model7 y_High.pdf')
+plot(EN, main = "Graphic of Regression Model 7: Elastic Net")
+```
+
+```{r}
+pred = predict(EN, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_Today - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_Today-pred))
+```
+
+## Regression Model 8: Best Subsets
+
+```{r include=FALSE, results = "hide"}
+head(dftrain)
+```
+
+```{r, results="hide"}
+BSR = regsubsets(y_High ~. -y_Today -y_Low , data = dftrain)
+```
+
+```{r}
+summary(BSR)
+```
+
+```{r}
+plot(BSR, main = "Best Subsets")
+```
+
+```{r, results='hide'}
+pdf (file = 'BSR_Model8 y_High.pdf')
+plot(BSR, main = "Best Subsets")
+```
+
+```{r}
+plot(BSR, scale = "adjr2", main="Best Subsets w/ adjr2")
+```
+
+```{r, results='hide'}
+pdf (file = 'BSR_adjr2_Model8 y_High.pdf')
+plot(BSR, scale = "adjr2", main="Best Subsets w/ adjr2")
+```
+
+```{r}
+regBSR = lm(y_Today ~ P3+ P4 + P8 + P10, data = dftest) #remember y_high and y_low not included 
+summary(regBSR)
+```
+
+```{r include=FALSE, results = "hide"}
+tab_model (regBSR, file = "regBSR_y_High.doc")
+```
+
+
+
+```{r}
+pred = predict(regBSR, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_Today - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_Today-pred))
+```
+
+
+
+# y_Low
+
+## Regression Model 1: Min square root
+
+```{r}
+reg = lm(y_Low ~ . -y_High -y_Today -y_Direction, data = train)
+summary(reg)
+```
+
+```{r include=FALSE, results = "hide"}
+tab_model (reg, file = "reg_y_low.doc")
+```
+
+```{r}
+plot (reg)
+```
+
+```{r}
+pdf ("regy_ylowplot.pdf")
+plot (reg)
+```
+
+```{r}
+pred = predict(reg, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_Low - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_Low-pred))
+```
+
+## Regression Model 2: Backward Elimination
+
+```{r include=FALSE, results="hide"}
+full = lm(y_Low ~. -y_High -y_Today -y_Direction, data = train)  
+#including interactions --> too long
+BE = step(full, direction = "backward")
+#backward setting. You need to start with the full model and start deleting variables from there. 
+```
+
+```{r}
+summary(BE)
+```
+
+```{r}
+plot (full)
+```
+
+```{r}
+pdf ("fully_ylowplot.pdf")
+plot (full)
+```
+
+```{r}
+plot (BE)
+```
+
+```{r}
+pdf ("BEy_ylowplot.pdf")
+plot (BE)
+```
+
+```{r include=FALSE, results = "hide"}
+tab_model (BE, file = "BE_y_low.doc")
+```
+
+```{r}
+pred = predict(BE, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_Low - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_Low-pred))
+```
+
+## Regression Model 3: Forward Selection
+
+```{r, include=FALSE, results="hide"}
+null = lm(y_Low ~ 1, data = train)
+FS = step(null, scope = list(upper = full), direction = "forward")  
+#you need to start with null model and start adding variables to it. 
+```
+
+```{r}
+summary(FS)
+```
+
+```{r}
+plot (null)
+```
+
+```{r}
+pdf ("nully_ylowplot.pdf")
+plot (null)
+```
+
+```{r}
+plot (FS)
+```
+
+```{r}
+pdf ("FSy_ylowplot.pdf")
+plot (FS)
+```
+
+```{r include=FALSE, results = "hide"}
+tab_model (reg, file = "FS_y_low.doc")
+```
+
+```{r}
+pred = predict(FS, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_Low - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_Low-pred))
+```
+
+## Regression Model 4: Stepwise
+
+```{r include=FALSE, results="hide"}
+stepwise = step(null, scope = list(upper=full), direction = "both") 
+#starts from nothing and it addas variables but can also eliminate variables.
+```
+
+```{r}
+summary(stepwise)
+```
+
+```{r}
+plot (stepwise)
+```
+
+```{r}
+pdf ("stepwisey_ylowplot.pdf")
+plot (stepwise)
+```
+
+```{r include=FALSE, results = "hide"}
+tab_model (stepwise, file = "stepwise_y_low.doc")
+```
+
+```{r}
+pred = predict(stepwise, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_Low - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_Low-pred))
+```
+
+## Regression Model 5: Random Forest
+
+```{r, results="hide"}
+# Fit random forest
+model = train(y_Low ~ . - y_Today - y_High -y_Direction, train, method = "ranger", tuneLength = 1)
+model
+```
+
+```{r}
+summary (model)
+```
+
+```{r}
+plot (model)
+```
+
+```{r}
+pdf ("modely_ylowplot.pdf")
+plot (model)
+```
+
+
+## Regression Model 6: Gradient Boosting Method
+
+```{r, include=FALSE,results="hide"}
+GBM = train(y_Low ~ . -y_Today -y_High -y_Direction, data = train, method = "gbm", tuneLength = 5)
+```
+
+```{r}
+plot(GBM, main = "Graphic of Regression Model 6: GBM y_Low")
+```
+
+```{r, results='hide'}
+pdf (file = 'GBM_Model6 y_Low.pdf')
+plot(GBM, main = "Graphic of Regression Model 6: GBM y_Low")
+```
+
+```{r}
+pred = predict(GBM, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_Low - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_Low-pred))
+```
+
+## Regression Model 7: Elastic Net
+
+```{r, results="hide"}
+EN = train(y_Low ~ . -y_High -y_Low -y_Direction, data = train, method = "glmnet")
+```
+
+```{r}
+plot(EN, main = "Graphic of Regression Model 7: Elastic Net y_Low")
+```
+
+```{r, results='hide'}
+pdf (file = 'EN_Model7 y_Low.pdf')
+plot(EN, main = "Graphic of Regression Model 7: Elastic Net y_Low")
+```
+
+```{r}
+pred = predict(EN, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_Low - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_Low-pred))
+```
+
+## Regression Model 8: Best Subsets
+
+```{r include=FALSE}
+head(dftrain)
+```
+
+```{r, results="hide"}
+BSR = regsubsets(y_Low ~. -y_Today -y_High , data = dftrain)
+```
+
+```{r, results="hide"}
+summary(BSR)
+```
+
+```{r}
+plot(BSR, main = "Regression Model 8: Best Subsets y_Low")
+```
+
+```{r, results='hide'}
+pdf (file = 'BSR_Model8 y_Low.pdf')
+plot(BSR, main = "Regression Model 8: Best Subsets y_Low")
+```
+
+```{r}
+plot(BSR, scale = "adjr2", main="Best Subsets w/ adjr2 y_Low")
+```
+
+```{r, results='hide'}
+pdf (file = 'BSR_adjr2_Model8 y_Low.pdf')
+plot(BSR, scale = "adjr2", main="Best Subsets w/ adjr2")
+```
+
+```{r}
+regBSR = lm(y_Low ~ P3+ P4 + P5, data = dftest) #remember y_high and y_low no included 
+summary(regBSR)
+```
+
+```{r}
+plot (regBSR)
+```
+
+```{r}
+pdf ("regBSRy_ylowplot.pdf")
+plot (regBSR)
+```
+
+```{r include=FALSE, results = "hide"}
+tab_model (regBSR, file = "regBSR_y_low.doc")
+```
+
+```{r}
+pred = predict(regBSR, test)
+#RMSE --> Metric for how good our predictions is. 
+sqrt(mean((test$y_Low - pred)^2))
+
+#MAE: mean absolute error.
+mean(abs(test$y_Low-pred))
+```
+
+## Graph Regression Results
+
+The methods are abbreviated as follows: 
+*OLS = Ordinary least squares (Multiple regression without interactions)* 
+*BE = Backward Elimination*
+*FS = Forward Selection* 
+*STW = Stepwise*
+*RF = Random Forest*
+*GBM = Gradient Boosting*
+*EN = Elastic Net*
+
+## y_Today
+
+```{r}
+#Y_Today
+Method = c("OLS", "BE", "FS", "STW", "RF", "GBM", "EN", "BSR")
+RMSE = c(0.0107079631, 0.01059638, 0.01054217, 0.01050207, 0.007959055, 0.0105301, 0.01037724, 0.01024591)
+dfRMSE = data.frame (Method, RMSE)
+
+ggplot(data=dfRMSE, aes(x=Method, y=RMSE)) + 
+  geom_bar(stat="identity", color="blue", fill="lightblue") + ggtitle("Y_Today RMSE")  + theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r, results='hide'}
+pdf (file = 'Y_Today_RMSE.pdf')
+ggplot(data=dfRMSE, aes(x=Method, y=RMSE)) + 
+  geom_bar(stat="identity", color="blue", fill="lightblue") + ggtitle("Y_Today RMSE")  + theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+#This and the previous one are the two ways to test or subsets.
+MAE = c(0.007694837, 0.00751485, 0.00744734, 0.007421196, 0.005614419, 0.007403046, 0.007324976, 0.00727928) #This is simmilar but looking the expected error. 
+dfMAE=data.frame(Method, MAE)
+
+ggplot(data=dfMAE, aes(x=Method, y=MAE)) +
+  geom_bar(stat="identity", color="red", fill="lightyellow") + ggtitle("Y_Today MAE") + theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r, results='hide'}
+pdf (file = 'Y_Today_MAE.pdf')
+ggplot(data=dfMAE, aes(x=Method, y=MAE)) +
+  geom_bar(stat="identity", color="red", fill="lightyellow") + ggtitle("Y_Today MAE") + theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+**For y_Today, Random Forest provided the optimal results.**
+
+## y_High
+
+```{r}
+#Y_High
+Method = c("OLS", "BE", "FS", "STW", "RF", "GBM", "EN", "BSR")
+RMSE = c(0.007187942,0.007011432,0.006997459,0.006968615,0.004732727,0.01448294,0.01171551,0.00997158)
+dfRMSE=data.frame(Method, RMSE)
+
+ggplot(data=dfRMSE, aes(x=Method, y=RMSE)) + 
+  geom_bar(stat="identity", color="red", fill="pink") + ggtitle("Y_High RMSE") + theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r, results='hide'}
+pdf (file = 'Y_High_RMSE.pdf')
+ggplot(data=dfRMSE, aes(x=Method, y=RMSE)) + 
+  geom_bar(stat="identity", color="red", fill="pink") + ggtitle("Y_High RMSE") + theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+#This and the previous one are the two ways to test or subsets.
+MAE = c(0.005199967,0.005041004,0.005013315,0.005001803,0.003593526,0.01085164,0.008194274,0.007262139) #This is similar but looking the expected error. 
+dfMAE=data.frame(Method, MAE)
+
+ggplot(data=dfMAE, aes(x=Method, y=MAE)) + 
+  geom_bar(stat="identity", color="orange", fill="gold1") + ggtitle("Y_High MAE") + theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r, results='hide'}
+pdf (file = 'Y_High_MAE.pdf')
+ggplot(data=dfMAE, aes(x=Method, y=MAE)) + 
+  geom_bar(stat="identity", color="orange", fill="gold1") + ggtitle("Y_High MAE") + theme(plot.title = element_text(hjust = 0.5))
+```
+
+**For y_High, Random Forest provided the optimal results.**
+
+## y_Low
+
+```{r}
+#Y_Low
+Method = c("OLS", "BE", "FS", "STW", "RF", "GBM", "EN", "BSR")
+RMSE = c(0.009055863, 0.008874242, 0.008754382,0.008711961, 0.006204833,0.009103632,0.004332218,0.008713928)
+dfRMSE=data.frame(Method, RMSE)
+
+ggplot(data=dfRMSE, aes(x=Method, y=RMSE)) + 
+  geom_bar(stat="identity", color="lightcoral", fill="lightgreen") + ggtitle("Y_Low RMSE") + theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r, results='hide'}
+pdf (file = 'Y_Low_RMSE.pdf')
+ggplot(data=dfRMSE, aes(x=Method, y=RMSE)) + 
+  geom_bar(stat="identity", color="lightcoral", fill="lightgreen") + ggtitle("Y_Low RMSE") + theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+#This and the previous one are the two ways to test our subsets.
+MAE = c(0.006896849, 0.006691318, 0.006439018, 0.006424835, 0.004388917 ,0.006737022,0.003058777,0.006538398) 
+#This is similar but looking the expected error. 
+dfMAE=data.frame(Method, MAE)
+
+ggplot(data=dfMAE, aes(x=Method, y=MAE)) + geom_bar(stat="identity", color="slateblue1", fill="slategray1") + ggtitle("Y_Low MAE") + theme(plot.title = element_text(hjust = 0.5))
+```
+**For y_Low, Random Forest provided the optimal results.**
+
+```{r, results='hide'}
+pdf (file = 'Y_Low_MAE.pdf')
+ggplot(data=dfMAE, aes(x=Method, y=MAE)) + geom_bar(stat="identity", color="slateblue1", fill="slategray1") + ggtitle("Y_Low MAE") + theme(plot.title = element_text(hjust = 0.5))
+```
